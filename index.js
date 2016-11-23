@@ -82,11 +82,8 @@ class Server{
 		this.port = port ? port : '27015';
 		
 		//this.options = [preOptions.join(' ')];
-<<<<<<< HEAD
 		this.options = ['-game garrysmod +map gm_construct'];
-=======
-		this.options = ['-game garrysmod +map gm_construct']
->>>>>>> origin/master
+
 		this.debug('Filled options table for SrcDS');
 	}
 	
@@ -95,22 +92,9 @@ class Server{
 		this.debug('Created process for SrcDS');
 		this.emit('processCreated', this.getProcess());
 		
-<<<<<<< HEAD
+
 		this.process.stdout.on('data', (data) => {
 			processOutput(data.toStirng('utf8'));
-=======
-		this.process.stdout.on('data', (output) => {
-			var data = output.toString('utf8');
-			for (var i=0; i<data.length; i+=1){
-				if (data.charCodeAt(i)===12){
-					this.processOutput(this.outputBuffer[this.outputCount]);
-					this.outputCount++;
-					this.outputBuffer[this.outputCount] = "";
-				}else{
-					this.outputBuffer[this.outputCount] += data[i];
-				}
-			}
->>>>>>> origin/master
 		});
 	}
 	
