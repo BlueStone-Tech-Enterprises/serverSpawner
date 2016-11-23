@@ -9,6 +9,7 @@
 const spawn = require('child_process').spawn;
 const EventEmitter = require('events');
 const colors = require('colors');
+const intercept = require("intercept-stdout");
 
 const srcdsLocation = "garrysmod/srcds_run";
 const _DEBUG = true;
@@ -39,6 +40,9 @@ class Server{
 		this.options = []
 		this.events = new EventEmitter();
 		
+		this.ignoreIntercept = false;
+		this.unhook_intercept = intercept(this.processOutput);
+		
 		this.createOptions(name, map, gamemode, playerCount, port, ip, rconPassword);
 		this.createProcess();
 		
@@ -50,19 +54,25 @@ class Server{
 	
 	debug( output ){
 		if ( _DEBUG ){
+			this.ignoreIntercept = true;
 			process.stdout.write('[ServerSpawner:DEBUGR] '.green);
 			console.log( output );
+			this.ignoreIntercept = false;
 		}
 	}
 
 	output( output ){
+		this.ignoreIntercept = true;
 		process.stdout.write('[ServerSpawner:OUTPUT] '.blue);
 		console.log( output );
+		this.ignoreIntercept = false;
 	}
 	
 	output( output ){
+		this.ignoreIntercept = true;
 		process.stdout.write('[ServerSpawner:!ERROR] '.red);
 		console.log( output );
+		this.ignoreIntercept = false;
 	}
 	
 	getProcess(){
@@ -84,7 +94,8 @@ class Server{
 		this.rconPassword = rconPassword;
 		this.port = port ? port : '27015';
 		
-		this.options = preOptions.join(' ');
+		//this.options = [preOptions.join(' ')];
+		this.options = ['-game garrysmod +map gm_construct'];
 		this.debug('Filled options table for SrcDS');
 	}
 	
@@ -94,25 +105,21 @@ class Server{
 		this.emit('processCreated', this.getProcess());
 		
 		this.process.stdout.on('data', (data) => {
-			for (var i=0; i<data.length; i+=1){
-				if (data.charCodeAt(i)===12){
-					this.processOutput(this.outputBuffer[this.outputCount]);
-					this.outputCount++;
-					this.outputBuffer[this.outputCount] = "";
-				}else{
-					this.outputBuffer[this.outputCount] += data[i];
-				}
-			}
+			processOutput(data.toStirng('utf8'));
 		});
 	}
 	
 	processOutput(sOutput){
-		this.output( sOutput );
-		this.emit('output',sOutput);
-		if ( sOutput == "VAC secure mode is activated." ){
-			this.emit('serverReady');
-			this.debug('Server is fully functional');
-		}
+		if ( !this.ignoreIntercept ){
+			this.output( sOutput );
+			this.emit('output',sOutput);
+			if ( sOutput == "VAC secure mode is activated." ){
+				this.emit('serverReady');
+				this.debug('Server is fully functional');
+			}
+			return '';
+		})
+		return sOutput;
 	}
 	
 }
