@@ -13,19 +13,6 @@ const colors = require('colors');
 const srcdsLocation = "garrysmod/srcds_run";
 const _DEBUG = true;
 
-var Messages = [];
-const WorkerEventStdOut = function(data){
-	Messages[this._process.sb_id] = Messages[this._process.sb_id] || "";
-	for (var i=0; i<data.length; i+=1){
-		if (data.charCodeAt(i)===255){
-			this._process.sb_listener.OnMessage(scon.decode(Messages[this._process.sb_id]).result,this._process);
-			Messages[this._process.sb_id] = "";
-		}else{
-			Messages[this._process.sb_id] += data[i];
-		}
-	}
-};
-
 class Server{
 	
 	constructor( name, map, gamemode, playerCount, port, ip, rconPassword ){
@@ -75,16 +62,17 @@ class Server{
 		preOptions.push('-game garrysmod');
 		preOptions.push('+map ' + map ? map : 'gm_construct');
 		//preOptions.push('-autoupdate');
-		preOptions.push('+hostname ' + name ? name : 'NodeJS Server Instance');
-		preOptions.push('+sv_gamemode ' + gamemode ? gamemode : 'sandbox');
-		preOptions.push('+maxplayers ' + playerCount ? playerCount : '16');
-		preOptions.push('+port ' + port ? port : '27015');
-		preOptions.push('+rcon_password ' + rconPassword);
+		//preOptions.push('+hostname ' + name ? name : 'NodeJS Server Instance');
+		//preOptions.push('+sv_gamemode ' + gamemode ? gamemode : 'sandbox');
+		//preOptions.push('+maxplayers ' + playerCount ? playerCount : '16');
+		//preOptions.push('+port ' + port ? port : '27015');
+		//preOptions.push('+rcon_password ' + rconPassword);
 		
 		this.rconPassword = rconPassword;
 		this.port = port ? port : '27015';
 		
-		this.options = preOptions.join(' ');
+		//this.options = [preOptions.join(' ')];
+		this.options = ['-game garrysmod +map gm_construct']
 		this.debug('Filled options table for SrcDS');
 	}
 	
@@ -93,7 +81,8 @@ class Server{
 		this.debug('Created process for SrcDS');
 		this.emit('processCreated', this.getProcess());
 		
-		this.process.stdout.on('data', (data) => {
+		this.process.stdout.on('data', (output) => {
+			var data = output.toString('utf8');
 			for (var i=0; i<data.length; i+=1){
 				if (data.charCodeAt(i)===12){
 					this.processOutput(this.outputBuffer[this.outputCount]);
