@@ -1,0 +1,11 @@
+{
+  "name": "serverspawner",
+  "version": "1.0.0",
+  "description": "Create and manage garrysmod servers from nodejs",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "James R Swift",
+  "license": "GPL-3.0"
+}
