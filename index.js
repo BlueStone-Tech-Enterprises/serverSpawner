@@ -10,4 +10,4 @@
 
 const Server = require('./lib/server.class.js');
 
-var server = new Server("test", "gm_construct", "sandbox", 16, 27015, '0.0.0.0', 'testing');
+var server = new Server("test", "gm_construct", "sandbox", 16);
